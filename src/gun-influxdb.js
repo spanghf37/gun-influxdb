@@ -1,5 +1,5 @@
 const {NodeAdapter} = require('gun-flint');
-const Mongojs = require('mongojs');
+const Influxdb = require('influxdb-nodejs');
 
 module.exports = new NodeAdapter({
 
@@ -19,17 +19,19 @@ module.exports = new NodeAdapter({
      * @return {void}
      */
     opt: function(context, opt) {
-        let mongo = opt.mongo || null;
-        if (mongo) {
+        let influx = opt.influx || null;
+        if (influx) {
             this.initialized = true;
-            let database = mongo.database || 'gun';
-            let port = mongo.port || '27017';
-            let host = mongo.host || 'localhost';
-            let query = mongo.query ? '?' + mongo.query : '';
-            this.collection = mongo.collection || 'gun-mongo';
-            this.db = Mongojs(`mongodb://${host}:${port}/${database}${query}`);
+            let database = influx.database || 'gun';
+            let port = influx.port || '8086';
+            let host = influx.host || 'localhost';
+            let schema: [
+                {
+                    measurement: let query = influx.query ? '?' + influx.query : '';
+            this.measurement = influx.measurement || 'gun-influx'; //this.collection = influx.collection || 'gun-mongo';
+            this.db = Influxdb(`http://${host}:${port}/${database}`);
 
-            this.indexInBackground = mongo.indexInBackground || false;
+            //this.indexInBackground = influx.indexInBackground || false;
         } else {
             this.initialized = false
         }
@@ -45,7 +47,10 @@ module.exports = new NodeAdapter({
      */
     get: function(key, done) {
         if (this.initialized) {
-            this.getCollection().findOne({_id: key}, {}, (err, result) => {
+            this.db.query(this.measurement)
+                .fields(this.fields)
+                .tags(this.tags)
+                .time(Date.now(),'ms')//.findOne({_id: key}, {}, (err, result) => {
                 if (err) {
                     done(this.errors.internal)
                 } else if (!result) {
