@@ -1,14 +1,14 @@
 {
-  "name": "gun-mongo",
+  "name": "gun-influxdb",
   "version": "0.1.0",
-  "description": "An Mongo adapter for Gunjs",
+  "description": "An InfluxDB adapter for Gunjs",
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sjones6/gun-mongo.git"
+    "url": "git+https://github.com/spanghf37/gun-influxdb.git"
   },
   "keywords": [
-    "mongodb",
+    "influxdb",
     "gun",
     "gunjs",
     "adapter"
@@ -16,13 +16,13 @@
   "author": "sjones6",
   "license": "MIT",
   "scripts": {
-    "test": "flint test ./src/gun-mongo.js --opt=./flint-opt.js",
-    "profile": "flint profile ./src/gun-mongo.js --opt=./flint-opt.js"
+    "test": "flint test ./src/gun-influxdb.js --opt=./flint-opt.js",
+    "profile": "flint profile ./src/gun-influxdb.js --opt=./flint-opt.js"
   },
   "bugs": {
-    "url": "https://github.com/sjones6/gun-mongo/issues"
+    "url": "https://github.com/spanghf37/gun-influxdb/issues"
   },
-  "homepage": "https://github.com/sjones6/gun-mongo#readme",
+  "homepage": "https://github.com/spanghf37/gun-influxdb#readme",
   "dependencies": {
     "gun-flint": "^0.0",
     "mongojs": "^2.4.0"
