@@ -27,10 +27,7 @@ module.exports = new NodeAdapter({
             let port = influx.port || '8086';
             let host = influx.host || 'localhost';
             let query = influx.query ? '?' + influx.query : '';
-            //this.measurement = influx.measurement || 'gun-influx'; //this.collection = influx.collection || 'gun-mongo';
             this.db = new Influx.InfluxDB(`http://${host}:${port}/${database}`);
-
-            //this.indexInBackground = influx.indexInBackground || false;
         } else {
             this.initialized = false
         }
@@ -47,14 +44,9 @@ module.exports = new NodeAdapter({
     get: function(key, done) {
         if (this.initialized) {
             //console.log("recherche en cours key : " + key);
-            this.db.query(`SELECT * FROM "metrics" WHERE "gunkey" = \'${key}\'`)
+            this.db.query(`SELECT * FROM "metrics" WHERE "fields_gunkey" = \'${key}\'`)
             .then(result => {
-                //console.log(JSON.stringify(result));
-                //var rlt = {"_":{"#":result[0].gunkey,">":{[result[0].fieldname]:result[0].lastupdate}},[result[0].fieldname]:result[0].fieldvalue}; 
-                //var rlt = {"_":{"#":result[0].gunkey,">":{[result[0].fieldname]:result[0].fieldlastupdate}},[result[0].fieldname]:result[0].fieldvalue}; 
-                //console.log(result[0].gunobject);
-                var rlt = JSON.parse(result[0].gunobject)//console.log(JSON.stringify(result[0].gunkey));
-                //console.log(JSON.stringify(rlt));
+                var rlt = JSON.parse(result[0].fields_gunobject);
                 done(null,rlt)})
             .catch(error => done(this.errors.internal));
                 
@@ -70,17 +62,7 @@ module.exports = new NodeAdapter({
                 }*/
             };
         },
-    //},
 
-/*
-    {"database" : "foo", "retentionPolicy" : "bar",
-    "points" : [
-        {"name" : "metrics",
-        "tags" : {"unit" : "sna1", "bigramme" : "AG", "type": "huile"},
-        "timestamp" : "2015-03-16T01:02:26.234Z",
-        "fields" : {"keyuuid": gundbuuid, "temperature" : 55.4, "pression" : 4.5}}]}
-*/
-// SELECT * FROM "metrics" WHERE "keyuuid" = gundbuuid
     /**
      * Write nodes to the DB
      * 
@@ -92,117 +74,29 @@ module.exports = new NodeAdapter({
      */
     put: function(key, node, done) {
         if (this.initialized) {
-            /*this.getCollection(key).findAndModify(
-                {
-                    query: {_id: key},
-                    update: { 
-                        key: key,
-                        val: node
-                    },
-                    upsert: true
-                }, done
-            );*/
-            //this.db.writeMeasurement('metrics', [
-            //    {
-            //        tags: node.tags,
-            //        fields: node.fields,
-            //        timestamp: node.timestamp
-            //    }
-            //], 
-            //{
-            //    database: 'gun'
-            //})
-            //console.log("key put  " + key);
-            //console.log("test : " + JSON.stringify(node));
-            //console.log(Object.getOwnPropertyNames(node));
-            //console.log(node.tags);
-            //var node_store = {main_node : '', main_key: '', tags_key: '', tags_node: '', fields_key: '', fields_node: '', main_ts: ''};
-            if(node.gun_node_type === 'main') { //gun_main_node found
-                console.log("main node key found " + key);
-                this.db.writeMeasurement('metrics', [   // node.measurement // metrics variable : ajouter nouveau attribut à main gun node comme timestamp
-                        {
-                            tags: {gun_main_key: node._["#"]},
-                            fields: {
-                                gun_main_node: JSON.stringify(node),
-                                gun_tags_key: node.tags["#"],
-                                gun_fields_key: node.fields["#"]
-                            },         
-                            timestamp: node.timestamp
-                        }
-                    ],  {
-                            database: 'gun'
-                    }, done
-                )
-            }
-            //else {
-            //    thinode.tags !== undefined && node.fields !== undefineds.db.query(`SELECT * FROM "metrics" WHERE ("gun_tags_key" = \'${key}\' OR "gun_fields_key" = \'${key}\')`)
-             //   .then(result => {
-             //       node.tags !== undefined && node.fields !== undefined    //console.log(JSON.stringify(result));
-                //var rlt = {"_":{"#":result[0].gunkey,">":{[result[0].fieldname]:result[0].lastupdate}},[result[0].fieldname]:result[0].fieldvalue}; 
-                //var rlt = {"_":{"#":result[0].gunkey,">":{[result[0].fieldname]:result[0].fieldlastupdate}},[result[0].fieldname]:result[0].fieldvalue}; 
-                //console.log(result[0].gunobject);
-                //node_store.main_node = JSON.parse(result[0].gun_main_node);
-                
-                //node_store_ JSON.parse(result[0].gun_main_node)//console.log(JSON.stringify(result[0].gunkey));
-                //console.log(JSON.stringify(rlt));
-              //  console.log(result);
-             //   console.log(JSON.stringify(node));
-                if(node.gun_node_type === 'tags'){
-                    console.log("tags node key found " + key);
-                    //console.log("tags key " + JSON.stringify({[Object.getOwnPropertyNames(node)[1]]: node.Object.getOwnPropertyNames(node)[1]}));
-                    this.db.writeMeasurement('metrics', [   // node.measurement // metrics variable : ajouter nouveau attribut à main gun node comme timestamp
-                        {
-                            tags: {
-                                //gun_main_key: result[0].gun_main_key,
-                                gun_main_key: node.gun_main_key,
-                                [Object.getOwnPropertyNames(node)[2]]: node[Object.getOwnPropertyNames(node)[2]],
-                                [Object.getOwnPropertyNames(node)[3]]: node[Object.getOwnPropertyNames(node)[3]]
-                            },
-                            fields: {
-                                //gun_main_node: result[0].gun_main_node,
-                                //gun_tags_key: result[0].gun_tags_key,
-                                gun_node_type: 'tags',
-                                gun_tags_key: node._["#"],
-
-                                
-                                //gun_fields_key: result[0].gun_fields_key
-                            },         
-                            timestamp: node.timestamp
-                        }
-                    ],  {
-                            database: 'gun'
-                    }, done
-                )
-                }
-                if(node.gun_node_type === 'fields'){
-                    console.log("fields node key found " + key);
-                      
-                    this.db.writeMeasurement('metrics', [   // node.measurement // metrics variable : ajouter nouveau attribut à main gun node comme timestamp
-                        {
-                            tags: {
-                                gun_main_key: node.gun_main_key
-                                //gun_main_key: result[0].gun_main_key,
-                                //[Object.getOwnPropertyNames(JSON.stringify(result[0].gun_tags_node))[2]]: JSON.stringify(result[0].gun_tags_node).Object.getOwnPropertyNames(JSON.stringify(result[0].gun_tags_node))[2],
-                                //[Object.getOwnPropertyNames(JSON.stringify(result[0].gun_tags_node))[3]]: JSON.stringify(result[0].gun_tags_node).Object.getOwnPropertyNames(JSON.stringify(result[0].gun_tags_node))[3]
-                            },
-                            fields: {
-                                //gun_main_node: result[0].gun_main_node,
-                                //gun_tags_key: result[0].gun_tags_key,
-                                gun_node_type: 'fields',
-                                gun_fields_key: node._["#"],
-                                [Object.getOwnPropertyNames(node)[2]]: node[Object.getOwnPropertyNames(node)[2]],
-                                [Object.getOwnPropertyNames(node)[3]]: node[Object.getOwnPropertyNames(node)[3]]
-                                
-                            },         
-                            timestamp: node.timestamp
-                        }
-                    ],  {
-                            database: 'gun'
-                    }, done
-                )
-                }
             
-        
+            let i;
+            let tags_object = {};
+            let fields_object = {fields_gunkey: node._["#"], fields_gunobject: JSON.stringify(node)};
+            for (i = Object.keys(node).indexOf("tags")+1; i < Object.keys(node).indexOf("fields"); i++){
+                tags_object[Object.keys(node)[i]] = node[Object.keys(node)[i]];
+            }
+            
+            
+            for (i = Object.keys(node).indexOf("fields")+1; i < Object.keys(node).indexOf("timestamp"); i++){
+                fields_object[Object.keys(node)[i]] = node[Object.keys(node)[i]];
+            }
+
+            this.db.writeMeasurement('metrics', [   
+                    {
+                        tags: tags_object,
+                        fields: fields_object,         
+                        timestamp: node.timestamp
+                    }
+                ],  {
+                        database: 'gun'
+                }, done
+            )   
         }
     },
 
