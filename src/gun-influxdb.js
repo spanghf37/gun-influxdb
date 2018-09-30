@@ -96,7 +96,9 @@ module.exports = new NodeAdapter({
                 ],  {
                         database: 'gun'
                 }, done
-            )   
+            ).catch(err => {
+                console.error('Error saving data to InfluxDB! ${err.stack}')
+            })
         }
     },
 
